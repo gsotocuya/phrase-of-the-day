@@ -1,4 +1,4 @@
-namespace PhraseOfTheDay.API;
+namespace PhraseOfTheDay;
 
 public class WeatherForecast
 {

@@ -380,7 +380,6 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # VS Code files for those working on multiple tools
-.vscode/
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
@@ -400,6 +399,9 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+.idea/
+.idea/*
+!.idea/.idea.PhraseOfTheDay/*
 
 ##
 ## Visual studio for Mac
