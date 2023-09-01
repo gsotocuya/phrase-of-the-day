@@ -403,6 +403,11 @@ FodyWeavers.xsd
 .idea/*
 !.idea/.idea.PhraseOfTheDay/*
 
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/vcs.xml
+
+
 ##
 ## Visual studio for Mac
 ##

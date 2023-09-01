@@ -2,70 +2,58 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using HtmlAgilityPack;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+
 
 namespace PhraseOfTheDay.Controllers;
 
 public class Pharse
 {
-    public string Description { get; set; } = string.Empty;
-    public string Author { get; set; }= string.Empty;
-    public string Publish { get; set; }= string.Empty;
-    public string Speciality { get; set; }= string.Empty;
+    public string Date { get; set; } = string.Empty;
+    public string Content { get; set; } = string.Empty;
+    public string Author { get; set; } = string.Empty;
+    public string Publish { get; set; } = string.Empty;
 }
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/phrase")]
 public class PhraseController : ControllerBase
 {
-    public PhraseController()
+    private readonly ILogger<Pharse> _logger;
+
+    public PhraseController(ILogger<Pharse> logger)
     {
-        
+        _logger = logger;
     }
 
     [HttpGet]
-    [AcceptVerbs("GET")]
-    public IEnumerable<Pharse> Get()
+    public async Task<string> GetAsync()
     {
+        var client = new HttpClient();
+        var response = await client.GetAsync("https://proverbia.net/frase-del-dia");
+
+        if (!response.IsSuccessStatusCode) return "Empty";
+
+        var html = await response.Content.ReadAsStringAsync();
         var document = new HtmlDocument();
-        document.LoadHtml("https://proverbia.net/frase-del-dia");
+        document.LoadHtml(html);
 
-        var content = document.DocumentNode.SelectSingleNode("//div[@class='col-md-8 px-md-4']");
-
-        var pharses = new List<Pharse>();
-        foreach (var item in content.SelectNodes("//blockquote[@class='bsquote']"))
+        var date = document.DocumentNode.SelectSingleNode("(//div[contains(@class,'col-md-8 px-md-4')]//h2)[1]")
+            .InnerText.Trim();
+        var content = document.DocumentNode.SelectSingleNode("(//blockquote[contains(@class,'bsquote')]//p)[1]")
+            .InnerText.Trim();
+        var author = document.DocumentNode.SelectSingleNode("(//blockquote[contains(@class,'bsquote')]//a)[1]")
+            .InnerText.Trim();
+        var publish = document.DocumentNode.SelectSingleNode("(//blockquote[contains(@class,'bsquote')]//em)[1]")
+            .InnerText.Trim();
+        var result = new Pharse
         {
-            var pharse = new Pharse();
-            pharse.Description = item.SelectSingleNode("//p").InnerText;
-            
-            pharses.Add(pharse);
-        }
-        
-        return pharses;
+            Date = date,
+            Content = content,
+            Author = author,
+            Publish = publish
+        };
+
+        return JsonConvert.SerializeObject(result);
     }
-    // public async Task<string> GetPhrase()
-    // {
-    //     
-    //     var phrase = new List<string>();
-    //     
-    //     var httpClient = new HttpClient();
-    //     var response = await httpClient.GetAsync($"https://proverbia.net/frase-del-dia");
-    //     var stream = await response.Content.ReadAsStreamAsync();
-    //
-    //     var document = new HtmlDocument();
-    //     document.Load(stream);
-    //
-    //     var headerNames = document.DocumentNode.SelectNodes("//blockquote[@class='bsquote']");
-    //
-    //     foreach (var item in headerNames)
-    //     {
-    //         phrase.Add(item.InnerText);
-    //     }
-    //
-    //     string jsonString = JsonSerializer.Serialize(phrase);
-    //
-    //     
-    //     
-    //     
-    //     return jsonString;
-    // }
 }
